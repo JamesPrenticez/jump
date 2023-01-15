@@ -1,6 +1,8 @@
 export function onUpdate(ctx, canvasWidth, canvasHeight, framesLastSecond) {
   // Clear Canvas
   ctx.clearRect(0 , 0, canvasWidth, canvasHeight)
+  ctx.fillStyle = "black"
+  ctx.fillRect(20, 20, 150, 100);
 
   // Frame Rate
   ctx.font = 'bold 25px serif';

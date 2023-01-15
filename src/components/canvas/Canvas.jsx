@@ -16,8 +16,7 @@ export const Canvas = props => {
   const canvasRef = useRef(null)
 
     const player = new Player()
-
-    let frame = new Frame(0, 0, 0)
+    const frame = new Frame(0, 0, 0)
     
     useEffect(() => {
       let timestamp
@@ -36,10 +35,13 @@ export const Canvas = props => {
         resizeCanvasToDisplaySize(canvas)
 
         // DRAW
-
-
         // Clear Canvas
         ctx.clearRect(0 , 0, canvasWidth, canvasHeight)
+        
+        // BG color
+        ctx.clearRect(0 , 0, canvasWidth, canvasHeight)
+        ctx.fillStyle = "goldenrod"
+        ctx.fillRect(0 , 0, canvasWidth, canvasHeight)
 
         // Frame Rate
         ctx.font = 'bold 25px serif';
@@ -47,7 +49,6 @@ export const Canvas = props => {
         ctx.fillText("FPS: " + frames.framesLastSecond, 10, 30)
         
         // draw player
-
         player.update(ctx)
         
         timestamp = window.requestAnimationFrame(render)

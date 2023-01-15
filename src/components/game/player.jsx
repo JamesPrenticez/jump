@@ -1,3 +1,7 @@
+import { Canvas } from "../canvas/Canvas"
+
+const canvasHeight = 500
+const canvasWidth = 500
 
 export class Player{
   constructor(ctx, controls, name){
@@ -6,17 +10,20 @@ export class Player{
       this.img = new Image()
       this.img.src = './character.png'
   
-      this.width = 39,
-      this.height = 52,
+      this.width = 50,
+      this.height = 50,
   
       this.frameX = 5,
       this.frameY = 0,
-  
-      this.x = 250,
-      this.y = 100,
-  
-      this.speed = 0
-  
+    
+      this.position = {x: 250, y: 250}
+      this.velocity = {x: 0, y: 0}
+      this.gravity = 0.2
+
+      this.friction = 0.125
+      this.acceleration = 2
+      this.jump = 0.50
+      this.maxSpeed = 1
       this.action = 'down'
   
       this.w = false
@@ -29,29 +36,79 @@ export class Player{
 
   update(ctx){
     this.frames()
+    this.applyGravity()
+    this.updatePosition()
     this.move()
     this.draw(ctx)
   }
 
 
 
+  // y
+  applyGravity(){
+    if(this.position.y + this.height + this.velocity.y >= canvasHeight){
+      this.velocity.y = 0
+    } else {
+      this.velocity.y += this.gravity
+    }
+  }
+
+  // // x
+  // friction(){
+  //   if(this.speed > 0){
+  //     this.speed -= this.friction
+  //   }
+
+  //   if(this.speed < 0){
+  //     this.speed += this.friction
+  //   }
+
+  //   //fix slight movement bug
+  //   if(Math.abs(this.speed) < this.friction){
+  //     this.speed = 0
+  //   }
+  // }
+
+  updatePosition(){
+    this.position.y += this.velocity.y
+  }
+
+
   move(){
+    // Up
     if(this.controls.w){
-      this.y -= 1
+      if(this.velocity.y <= -1) return
+      this.velocity.y += -this.acceleration
       this.action = 'up'
     }
+
+    // Down
+    if(this.controls.s){
+      if(this.velocity.y >= 1) return
+      this.velocity.y += this.speed
+      this.action = 'down'
+    }
+    
+    
+    // Left
     if(this.controls.a){
-      this.x -= 1
+      if(this.velocity.x <= -1) return
+      this.velocity.x += -this.speed
       this.action = 'right'
     }
 
-    if(this.controls.s){
-      this.y += 1
-      this.action = 'down'
+    // Right
+    if(this.controls.d){
+      if(this.velocity.x >= 1) return
+      this.velocity.x += this.speed
+      this.action = 'left'
     }
 
+
+    // Right
     if(this.controls.d){
-      this.x += 1
+      if(this.velocity.x >= 1) return
+      this.velocity.x += 0.01
       this.action = 'left'
     }
 
@@ -68,6 +125,7 @@ export class Player{
     if(this.controls.a && this.controls.s){
       this.action = 'bottom left'
     }
+
   }
 
   frames(){
@@ -109,7 +167,14 @@ export class Player{
   draw(ctx){
     ctx.fillStyle = 'red'
     ctx.beginPath()
-    ctx.arc(this.x, this.y, 20, 0, 2*Math.PI)
+    // ctx.arc(this.position.x, this.position.y, 20, 0, 2*Math.PI)
+    ctx.fillRect(this.position.x, this.position.y, this.width, this.height)
     ctx.fill()
+
+    // Draw player stats
+    ctx.font = 'bold 25px serif';
+    ctx.fillStyle = "#000000"
+    ctx.fillText("pos x:" + Math.floor(this.position.x) + " y:" + Math.floor(this.position.y), 10, 450)
+    ctx.fillText("vol x:" + Math.floor(this.velocity.x) + " y:" + Math.floor(this.velocity.y), 10, 490)
   }
 }
