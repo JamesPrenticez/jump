@@ -30,14 +30,14 @@ export const Canvas = props => {
       player.controls = new Controls(canvas, "player")
 
       const render = (timestamp) => {
-        
+
         frame.setCurrentFrame()
         resizeCanvasToDisplaySize(canvas)
 
         // DRAW
         // Clear Canvas
         ctx.clearRect(0 , 0, canvasWidth, canvasHeight)
-        
+
         // BG color
         ctx.clearRect(0 , 0, canvasWidth, canvasHeight)
         ctx.fillStyle = "goldenrod"
@@ -46,7 +46,7 @@ export const Canvas = props => {
         // Frame Rate
         ctx.font = 'bold 25px serif';
         ctx.fillStyle = "#ff0000"
-        ctx.fillText("FPS: " + frames.framesLastSecond, 10, 30)
+        ctx.fillText("FPS: " + frame.framesLastSecond, 10, 30)
         
         // draw player
         player.update(ctx)

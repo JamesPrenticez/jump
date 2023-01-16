@@ -1,5 +1,3 @@
-import { Canvas } from "../canvas/Canvas"
-
 const canvasHeight = 500
 const canvasWidth = 500
 
@@ -7,29 +5,32 @@ export class Player{
   constructor(ctx, controls, name){
       this.ctx = ctx
       this.name = name,
+      this.width = 37,
+      this.height = 56,
+      
       this.img = new Image()
-      this.img.src = './character.png'
+      this.img.src = './agent.png'
   
-      this.width = 50,
-      this.height = 50,
-  
-      this.frameX = 5,
-      this.frameY = 0,
+      this.action = 'down'
+      this.spriteSheetFrameX = 0,
+      this.spriteSheetFrameY = 0,
+      this.spriteSheetWidth = 32,
+      this.spriteSheetHeight = 32,
     
       this.position = {x: 250, y: 250}
       this.velocity = {x: 0, y: 0}
-      this.gravity = 0.2
+      this.gravity = 0.02
+      this.friction = 0.02
 
-      this.friction = 0.125
-      this.acceleration = 2
-      this.jump = 0.50
+      this.acceleration = 0.1
       this.maxSpeed = 1
-      this.action = 'down'
   
       this.w = false
       this.a = false
       this.s = false
       this.d = false
+
+      this.jump = {isOnCooldown: false, duration: 1000}
 
       this.controls = controls
   }
@@ -37,12 +38,12 @@ export class Player{
   update(ctx){
     this.frames()
     this.applyGravity()
+    this.applyFriction()
     this.updatePosition()
     this.move()
     this.draw(ctx)
+    this.drawPlayerSprite(ctx)
   }
-
-
 
   // y
   applyGravity(){
@@ -54,62 +55,58 @@ export class Player{
   }
 
   // // x
-  // friction(){
-  //   if(this.speed > 0){
-  //     this.speed -= this.friction
-  //   }
+  applyFriction(){
+    if(this.velocity.x > 0){
+      this.velocity.x -= this.friction
+    }
 
-  //   if(this.speed < 0){
-  //     this.speed += this.friction
-  //   }
+    if(this.velocity.x < 0){
+      this.velocity.x += this.friction
+    }
 
-  //   //fix slight movement bug
-  //   if(Math.abs(this.speed) < this.friction){
-  //     this.speed = 0
-  //   }
-  // }
+    //fix slight movement bug
+    if(Math.abs(this.velocity.x) < this.friction){
+       this.velocity.x = 0
+    }
+  }
 
   updatePosition(){
     this.position.y += this.velocity.y
+    this.position.x += this.velocity.x
   }
 
 
   move(){
     // Up
     if(this.controls.w){
-      if(this.velocity.y <= -1) return
-      this.velocity.y += -this.acceleration
+      if(this.velocity.y <= -this.maxSpeed) return
+      // console.log(this.jump.isOnCooldown)
+      if(this.jump.isOnCooldown) return
+      this.velocity.y += -(this.acceleration + 5)
       this.action = 'up'
+    } else if (!this.controls.w) {
+      this.velocity.y += this.acceleration
     }
 
     // Down
     if(this.controls.s){
-      if(this.velocity.y >= 1) return
-      this.velocity.y += this.speed
+      if(this.velocity.y >= this.maxSpeed) return
+      this.velocity.y += this.acceleration
       this.action = 'down'
     }
-    
+
+    // Right
+    if(this.controls.d){
+      if(this.velocity.x >= this.maxSpeed) return
+      this.velocity.x += this.acceleration
+      this.action = 'left'
+    }
     
     // Left
     if(this.controls.a){
-      if(this.velocity.x <= -1) return
-      this.velocity.x += -this.speed
+      if(this.velocity.x <= -this.maxSpeed) return
+      this.velocity.x += -this.acceleration
       this.action = 'right'
-    }
-
-    // Right
-    if(this.controls.d){
-      if(this.velocity.x >= 1) return
-      this.velocity.x += this.speed
-      this.action = 'left'
-    }
-
-
-    // Right
-    if(this.controls.d){
-      if(this.velocity.x >= 1) return
-      this.velocity.x += 0.01
-      this.action = 'left'
     }
 
     // Diagonals
@@ -176,5 +173,23 @@ export class Player{
     ctx.fillStyle = "#000000"
     ctx.fillText("pos x:" + Math.floor(this.position.x) + " y:" + Math.floor(this.position.y), 10, 450)
     ctx.fillText("vol x:" + Math.floor(this.velocity.x) + " y:" + Math.floor(this.velocity.y), 10, 490)
+  }
+
+  //https://stackoverflow.com/questions/8168217/html-canvas-how-to-draw-a-flipped-mirrored-image
+  // Animate()
+
+  drawPlayerSprite(ctx){
+    // Source > Destination
+    ctx.drawImage(
+      this.img, //img
+      this.spriteSheetFrameX * this.spriteSheetWidth, //sX
+      this.spriteSheetFrameY * this.spriteSheetHeight, //sY
+      this.spriteSheetWidth, //sW
+      this.spriteSheetHeight, //sH
+      this.position.x, //dX 
+      this.position.y, //dY
+      this.width, //dW
+      this.height //dH
+    )
   }
 }

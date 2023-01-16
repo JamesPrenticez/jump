@@ -7,9 +7,13 @@ export default function Game() {
 
 
   return (
+    <>
     <Canvas 
       height={500}
       width={500}
-    />
+      />
+
+    <img src="./agent.png" alt="" />
+    </>
   )
 }
