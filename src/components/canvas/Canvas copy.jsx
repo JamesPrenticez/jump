@@ -2,6 +2,8 @@ import React, { useRef, useEffect } from 'react'
 // ====================================================================================== 
 //  Canvas 
 // ====================================================================================== 
+import { Frame } from '../game/frame'
+import { onUpdate } from '../game/onUpdate'
 
 import { Player } from '../game/player'
 import { Controls } from '../game/controls'
@@ -10,17 +12,8 @@ import { Controls } from '../game/controls'
 let canvasWidth = 500
 let canvasHeight = 500
 
-let fps = 30
-let fpsInterval = 1000 / fps
-let frameCount = 0
-
-let startTime = window.performance.now()
-let now = window.performance.now()
-let then = window.performance.now()
-let elapsed
 
 export const Canvas = props => {
-
   const canvasRef = useRef(null)
 
     useEffect(() => {
@@ -31,39 +24,29 @@ export const Canvas = props => {
       const ctx = canvas.getContext('2d')
       
       const player = new Player()
+      const frame = new Frame(0, 0, 0)
       player.name = "james"
       player.controls = new Controls(canvas, "player")
       
 
-      const render = (newtime) => {
-        now = newtime
-        elapsed = now - then
 
-        window.requestAnimationFrame(render)
+      const render = (timestamp) => {
 
-        //Throttle FPS 
-        if (elapsed >= fpsInterval) {
-          then = now - (elapsed % fpsInterval)
+        frame.setCurrentFrame()
+        resizeCanvasToDisplaySize(canvas)
+        mainDraw(ctx, player, frame)
 
-          let sinceStart = now - startTime
-          let currentFps = Math.round(1000 / (sinceStart / ++frameCount) * 100) / 100
-
-          // Do Stuff
-          resizeCanvasToDisplaySize(canvas)
-          mainDraw(ctx, player, currentFps)
-        }
-        
-        
+        // if(frame.framesLastSecond < 30){
+          timestamp = window.requestAnimationFrame(render)
+        // }
       }
       
-      render()
-
+      render(timestamp)
+      
       return () => {
         window.cancelAnimationFrame(timestamp)
       }
-
-
-    }, [mainDraw])
+    }, [onUpdate])
   
   return <canvas ref={canvasRef} tabIndex={0} className="ring-2 ring-red-500 focus:ring-green-500 select-none box-border rounded-md outline-none"/>
 }
@@ -71,18 +54,18 @@ export const Canvas = props => {
 // ====================================================================================== 
 // Main Draw
 // ====================================================================================== 
-function mainDraw(ctx, player, frameCount){
+function mainDraw(ctx, player, frame){
         ctx.clearRect(0 , 0, canvasWidth, canvasHeight)
 
         // BG color
         ctx.clearRect(0 , 0, canvasWidth, canvasHeight)
-        ctx.fillStyle = "black"
+        ctx.fillStyle = "goldenrod"
         ctx.fillRect(0 , 0, canvasWidth, canvasHeight)
 
         // Frame Rate
         ctx.font = 'bold 25px serif';
         ctx.fillStyle = "#ff0000"
-        ctx.fillText("FPS: " + frameCount, 10, 30)
+        ctx.fillText("FPS: " + frame.framesLastSecond, 10, 30)
         
         // draw player
         player.update(ctx)

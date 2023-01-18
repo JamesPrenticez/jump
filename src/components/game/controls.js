@@ -47,6 +47,7 @@ export class Controls{
           case "d":
             this.d = false
             break
+
         }
       })
     }
